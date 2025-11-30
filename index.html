@@ -20,53 +20,75 @@
 <h1>Image Puzzle</h1>
 <div id="timer">Time left: <span id="time">120</span>s</div>
 <div id="controls"><button onclick="shufflePieces()">Shuffle Again</button></div>
-<div id="puzzle">
-<div class="cell"><img src="piece_0_1.png" class="piece" onclick="selectPiece(this)" id="piece_0_1.png"></div><div class="cell"><img src="piece_0_2.png" class="piece" onclick="selectPiece(this)" id="piece_0_2.png"></div><div class="cell"><img src="piece_1_2.png" class="piece" onclick="selectPiece(this)" id="piece_1_2.png"></div><div class="cell"><img src="piece_2_0.png" class="piece" onclick="selectPiece(this)" id="piece_2_0.png"></div><div class="cell"><img src="piece_1_0.png" class="piece" onclick="selectPiece(this)" id="piece_1_0.png"></div><div class="cell"><img src="piece_2_2.png" class="piece" onclick="selectPiece(this)" id="piece_2_2.png"></div><div class="cell"><img src="piece_1_1.png" class="piece" onclick="selectPiece(this)" id="piece_1_1.png"></div><div class="cell"><img src="piece_2_1.png" class="piece" onclick="selectPiece(this)" id="piece_2_1.png"></div><div class="cell"><img src="piece_0_0.png" class="piece" onclick="selectPiece(this)" id="piece_0_0.png"></div>
-</div>
+<div id="puzzle"></div>
+
 <script>
-let timeLeft = 120;
-let timer = setInterval(function() {
-    timeLeft--;
-    document.getElementById('time').innerText = timeLeft;
-    if (timeLeft <= 0) {
-        clearInterval(timer);
-        alert('Time's up! Try again?');
-        location.reload();
-    }
-}, 1000);
+const pieces = [
+  "piece_0_0.png","piece_0_1.png","piece_0_2.png",
+  "piece_1_0.png","piece_1_1.png","piece_1_2.png",
+  "piece_2_0.png","piece_2_1.png","piece_2_2.png"
+];
 
 let selectedPiece = null;
+let timeLeft = 120;
+let timer = setInterval(updateTimer, 1000);
+
+function updateTimer() {
+  timeLeft--;
+  document.getElementById('time').innerText = timeLeft;
+  if (timeLeft <= 0) {
+    clearInterval(timer);
+    alert("Time's up! Try again?");
+    location.reload();
+  }
+}
+
+function renderPuzzle(order) {
+  const puzzle = document.getElementById('puzzle');
+  puzzle.innerHTML = '';
+  order.forEach(id => {
+    const cell = document.createElement('div');
+    cell.className = 'cell';
+    const img = document.createElement('img');
+    img.src = id;
+    img.id = id;
+    img.className = 'piece';
+    img.onclick = () => selectPiece(img);
+    cell.appendChild(img);
+    puzzle.appendChild(cell);
+  });
+}
+
 function selectPiece(piece) {
-    if (!selectedPiece) {
-        selectedPiece = piece;
-        piece.classList.add('selected');
-    } else {
-        // Swap pieces
-        let tempParent = piece.parentNode;
-        let selectedParent = selectedPiece.parentNode;
-        selectedParent.appendChild(piece);
-        tempParent.appendChild(selectedPiece);
-        selectedPiece.classList.remove('selected');
-        selectedPiece = null;
-        checkSolved();
-    }
+  if (!selectedPiece) {
+    selectedPiece = piece;
+    piece.classList.add('selected');
+  } else {
+    const tempParent = piece.parentNode;
+    const selectedParent = selectedPiece.parentNode;
+    selectedParent.appendChild(piece);
+    tempParent.appendChild(selectedPiece);
+    selectedPiece.classList.remove('selected');
+    selectedPiece = null;
+    checkSolved();
+  }
 }
 
 function shufflePieces() {
-    let cells = document.querySelectorAll('#puzzle .cell');
-    let pieces = Array.from(cells).map(cell => cell.firstChild);
-    pieces.sort(() => Math.random() - 0.5);
-    cells.forEach((cell, i) => cell.appendChild(pieces[i]));
+  const shuffled = [...pieces].sort(() => Math.random() - 0.5);
+  renderPuzzle(shuffled);
 }
 
 function checkSolved() {
-    let cells = document.querySelectorAll('#puzzle .cell img');
-    let currentOrder = Array.from(cells).map(p => p.id);
-    let correctOrder = ["piece_0_0.png","piece_0_1.png","piece_0_2.png","piece_1_0.png","piece_1_1.png","piece_1_2.png","piece_2_0.png","piece_2_1.png","piece_2_2.png"];
-    if (JSON.stringify(currentOrder) === JSON.stringify(correctOrder)) {
-        alert('Puzzle Solved!');
-    }
+  const currentOrder = Array.from(document.querySelectorAll('#puzzle img')).map(p => p.id);
+  if (JSON.stringify(currentOrder) === JSON.stringify(pieces)) {
+    clearInterval(timer); // Stop timer
+    document.getElementById('timer').style.display = 'none'; // Hide timer
+    alert('Puzzle Solved!');
+  }
 }
+
+shufflePieces();
 </script>
 </body>
 </html>
