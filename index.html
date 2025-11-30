@@ -1,0 +1,72 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<title>Image Puzzle</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  body { font-family: Arial; text-align: center; margin: 0; padding: 0; }
+  h1 { font-size: 1.5em; margin: 10px; }
+  #timer { font-size: 1.2em; margin: 10px; }
+  #controls { margin: 10px; }
+  #puzzle { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; max-width: 95vw; margin: auto; }
+  .cell { width: 100%; position: relative; border: 1px solid #ccc; min-height: 80px; }
+  .piece { width: 100%; height: auto; cursor: pointer; }
+  .selected { outline: 4px solid red; }
+  button { padding: 10px 15px; font-size: 16px; cursor: pointer; }
+</style>
+</head>
+<body>
+<h1>Image Puzzle</h1>
+<div id="timer">Time left: <span id="time">120</span>s</div>
+<div id="controls"><button onclick="shufflePieces()">Shuffle Again</button></div>
+<div id="puzzle">
+<div class="cell"><img src="piece_0_1.png" class="piece" onclick="selectPiece(this)" id="piece_0_1.png"></div><div class="cell"><img src="piece_0_2.png" class="piece" onclick="selectPiece(this)" id="piece_0_2.png"></div><div class="cell"><img src="piece_1_2.png" class="piece" onclick="selectPiece(this)" id="piece_1_2.png"></div><div class="cell"><img src="piece_2_0.png" class="piece" onclick="selectPiece(this)" id="piece_2_0.png"></div><div class="cell"><img src="piece_1_0.png" class="piece" onclick="selectPiece(this)" id="piece_1_0.png"></div><div class="cell"><img src="piece_2_2.png" class="piece" onclick="selectPiece(this)" id="piece_2_2.png"></div><div class="cell"><img src="piece_1_1.png" class="piece" onclick="selectPiece(this)" id="piece_1_1.png"></div><div class="cell"><img src="piece_2_1.png" class="piece" onclick="selectPiece(this)" id="piece_2_1.png"></div><div class="cell"><img src="piece_0_0.png" class="piece" onclick="selectPiece(this)" id="piece_0_0.png"></div>
+</div>
+<script>
+let timeLeft = 120;
+let timer = setInterval(function() {
+    timeLeft--;
+    document.getElementById('time').innerText = timeLeft;
+    if (timeLeft <= 0) {
+        clearInterval(timer);
+        alert('Time's up! Try again?');
+        location.reload();
+    }
+}, 1000);
+
+let selectedPiece = null;
+function selectPiece(piece) {
+    if (!selectedPiece) {
+        selectedPiece = piece;
+        piece.classList.add('selected');
+    } else {
+        // Swap pieces
+        let tempParent = piece.parentNode;
+        let selectedParent = selectedPiece.parentNode;
+        selectedParent.appendChild(piece);
+        tempParent.appendChild(selectedPiece);
+        selectedPiece.classList.remove('selected');
+        selectedPiece = null;
+        checkSolved();
+    }
+}
+
+function shufflePieces() {
+    let cells = document.querySelectorAll('#puzzle .cell');
+    let pieces = Array.from(cells).map(cell => cell.firstChild);
+    pieces.sort(() => Math.random() - 0.5);
+    cells.forEach((cell, i) => cell.appendChild(pieces[i]));
+}
+
+function checkSolved() {
+    let cells = document.querySelectorAll('#puzzle .cell img');
+    let currentOrder = Array.from(cells).map(p => p.id);
+    let correctOrder = ["piece_0_0.png","piece_0_1.png","piece_0_2.png","piece_1_0.png","piece_1_1.png","piece_1_2.png","piece_2_0.png","piece_2_1.png","piece_2_2.png"];
+    if (JSON.stringify(currentOrder) === JSON.stringify(correctOrder)) {
+        alert('Puzzle Solved!');
+    }
+}
+</script>
+</body>
+</html>
